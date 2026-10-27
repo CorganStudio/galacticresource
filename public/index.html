@@ -244,7 +244,7 @@
   <aside class="sidebar-left" id="sidebar">
     <h3>Galactic Structure</h3>
     <label class="layer-row" data-layer="spiral">
-      <input type="checkbox" checked><span>Procedural spiral + halo</span><span class="lr-count" id="c-spiral">50k</span>
+      <input type="checkbox" checked><span>Procedural spiral + halo</span><span class="lr-count" id="c-spiral">80k</span>
     </label>
     <label class="layer-row" data-layer="arms">
       <input type="checkbox"><span>Spiral arm labels</span><span class="lr-count" id="c-arms">6</span>
@@ -308,7 +308,7 @@
     <h3>Navigation</h3>
     <div style="padding:4px 14px 12px;display:flex;flex-wrap:wrap;gap:4px">
       <button class="nav-preset" data-pos="320,400,900" data-tgt="0,0,0" style="font-size:9.5px;padding:4px 8px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:4px;color:rgba(160,168,184,0.8);cursor:pointer">Full Galaxy</button>
-      <button class="nav-preset" data-pos="270,30,60" data-tgt="260,0,0" style="font-size:9.5px;padding:4px 8px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:4px;color:rgba(160,168,184,0.8);cursor:pointer">Solar Neighborhood</button>
+      <button class="nav-preset" data-pos="sol:10,30,60" data-tgt="sol" style="font-size:9.5px;padding:4px 8px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:4px;color:rgba(160,168,184,0.8);cursor:pointer">Solar Neighborhood</button>
       <button class="nav-preset" data-pos="40,80,120" data-tgt="0,0,0" style="font-size:9.5px;padding:4px 8px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:4px;color:rgba(160,168,184,0.8);cursor:pointer">Galactic Core</button>
       <button class="nav-preset" data-pos="800,600,2000" data-tgt="0,0,0" style="font-size:9.5px;padding:4px 8px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:4px;color:rgba(160,168,184,0.8);cursor:pointer">Local Group</button>
     </div>
@@ -400,7 +400,7 @@
       r = 1.0; g = 0.88; bl = 0.65;
     } else if (roll < 0.93) {
       // Scale: LY_PER_SCENE=100, so 500 scene units = 50,000 ly = real Milky Way disk radius.
-      // Arms extend from ~100 to ~540 scene units, putting Sol (at scene unit 260) at ~48% of visible radius,
+      // Arms extend from ~100 to ~540 scene units, putting Sol (at scene unit ~267, see SOL_POS) at ~49% of visible radius,
       // matching the real-sky view where Sol sits about halfway out.
       var arm = Math.floor(srand() * ARM_COUNT);
       var theta = srand() * 6;
@@ -439,10 +439,17 @@
   var layers = { spiral: galaxy };
 
   // ═══ SOL MARKER ═══
-  // Pixel-sized point at 26 kly from center (260 scene units on +X).
+  // Scene scale (shared with ICRS conversion below): 1 scene unit = 100 ly, so 10 units = 1 kly.
+  var LY_PER_SCENE = 100;
+  var PC_TO_LY = 3.26156;
+  var PC_TO_SCENE = PC_TO_LY / LY_PER_SCENE;
+  // Sun-to-galactic-center distance R0 = 8178 pc (26.67 kly, 266.7 scene units on +X).
+  // GRAVITY Collaboration 2019, A&A 625, L10 (https://arxiv.org/abs/1904.05721).
+  // Matches Sgr A* dist_pc in data/galactic-objects.json.
   // Using THREE.Points with sizeAttenuation:false so the marker stays visible
   // regardless of camera zoom - same pattern as the spiral and BSC layers.
-  var SOL_POS = new THREE.Vector3(260, 0, 0);
+  var SOL_R0_PC = 8178;
+  var SOL_POS = new THREE.Vector3(SOL_R0_PC * PC_TO_SCENE, 0, 0);
   var solGeo = new THREE.BufferGeometry();
   solGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([SOL_POS.x, SOL_POS.y, SOL_POS.z]), 3));
   var solGroup = new THREE.Points(solGeo, new THREE.PointsMaterial({
@@ -462,9 +469,7 @@
   layers.sgra = sgraGroup;
 
   // ═══ ICRS TO SCENE CONVERSION ═══
-  var LY_PER_SCENE = 100;
-  var PC_TO_LY = 3.26156;
-  var PC_TO_SCENE = PC_TO_LY / LY_PER_SCENE;
+  // LY_PER_SCENE / PC_TO_SCENE are defined above the Sol marker.
   var ICRS_TO_GAL = [
     [-0.0548755604, -0.8734370902, -0.4838350155],
     [ 0.4941094279, -0.4448296300,  0.7469822445],
@@ -817,12 +822,20 @@
   // ═══ NAVIGATION PRESETS ═══
   document.querySelectorAll('.nav-preset').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      var p = btn.getAttribute('data-pos').split(',').map(Number);
-      var t = btn.getAttribute('data-tgt').split(',').map(Number);
+      // "sol" / "sol:dx,dy,dz" resolve relative to SOL_POS so presets follow R0.
+      function parseVec(s) {
+        if (s === 'sol') return SOL_POS.clone();
+        if (s.indexOf('sol:') === 0) {
+          var d = s.slice(4).split(',').map(Number);
+          return SOL_POS.clone().add(new THREE.Vector3(d[0], d[1], d[2]));
+        }
+        var v = s.split(',').map(Number);
+        return new THREE.Vector3(v[0], v[1], v[2]);
+      }
       var startPos = camera.position.clone();
       var startTgt = controls.target.clone();
-      var endPos = new THREE.Vector3(p[0], p[1], p[2]);
-      var endTgt = new THREE.Vector3(t[0], t[1], t[2]);
+      var endPos = parseVec(btn.getAttribute('data-pos'));
+      var endTgt = parseVec(btn.getAttribute('data-tgt'));
       var anim = { t: 0 };
       function step() {
         anim.t = Math.min(1, anim.t + 0.02);
@@ -916,7 +929,7 @@
 </script>
 
 <div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;font-size:12px;color:#333">
-  <p>GalacticResource is the Corgan Studio Milky Way intelligence platform. Procedural spiral-arm background, Yale Bright Star Catalog (9,096 stars), 4,563 NASA Exoplanet Archive host systems plotted in true galactic coordinates, Sgr A* supermassive black hole at galactic center, Sol positioned 26,000 light-years from core, labeled spiral arms (Perseus, Sagittarius, Scutum-Centaurus, Norma, Outer, Orion Spur), notable nebulae (Orion, Eagle, Crab, Lagoon, Tarantula), globular clusters (Omega Centauri, 47 Tucanae, M13), Local Group galaxies (M31 Andromeda, M33 Triangulum, LMC, SMC). Part of the Resource Systems multi-planetary suite alongside <a href="https://terraresource.net">TerraResource</a>, <a href="https://moonresource.com">MoonResource</a>, <a href="https://marsresource.net">MarsResource</a>, <a href="https://solarsystemresource.com">SolarSystemResource</a>, built by <a href="https://corganstudio.com">Corgan Studio</a>.</p>
+  <p>GalacticResource is the Corgan Studio Milky Way intelligence platform. Procedural spiral-arm background, Yale Bright Star Catalog (9,096 stars), 4,563 NASA Exoplanet Archive host systems plotted in true galactic coordinates, Sgr A* supermassive black hole at galactic center, Sol positioned 26,700 light-years (8.18 kpc) from core, labeled spiral arms (Perseus, Sagittarius, Scutum-Centaurus, Norma, Outer, Orion Spur), notable nebulae (Orion, Eagle, Crab, Lagoon, Tarantula), globular clusters (Omega Centauri, 47 Tucanae, M13), Local Group galaxies (M31 Andromeda, M33 Triangulum, LMC, SMC). Part of the Resource Systems multi-planetary suite alongside <a href="https://terraresource.net">TerraResource</a>, <a href="https://moonresource.com">MoonResource</a>, <a href="https://marsresource.net">MarsResource</a>, <a href="https://solarsystemresource.com">SolarSystemResource</a>, built by <a href="https://corganstudio.com">Corgan Studio</a>.</p>
 </div>
 </body>
 </html>
