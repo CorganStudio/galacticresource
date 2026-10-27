@@ -338,7 +338,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js" integrity="sha384-vV17nr/rMaJqmeZkFUzXLpHdQ+ME5QHKdydaqqN+3Ga39RJlNrTatJxHwGV4ml2C" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js" integrity="sha384-I0DMsfimAPIqWT8lF+oA997gRgdUi3jhidoTq3fN0zmn35smXZukD01FLnsPRU9i" crossorigin="anonymous"></script>
-<script src="resource-systems-core.js?v=26"></script>
+<script src="resource-systems-core.js?v=27"></script>
 
 <script>
 // ═══ GALACTIC RESOURCE v2 - REBUILT FROM SCRATCH ═══
@@ -355,7 +355,7 @@
   camera.position.set(0, 100, 280);
 
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setPixelRatio(RS.pixelRatio());
   renderer.setSize(w, h);
 
   // ═══ PROCEDURAL MILKY WAY ═══
@@ -641,12 +641,19 @@
     renderer.setSize(w, h);
   });
 
-  // Render loop - slow rotation
+  // Render loop - slow rotation. Fan control: the galaxy only draws for input,
+  // camera moves and loads, else once a second; the spin follows the clock so
+  // it keeps the same speed at any frame rate.
+  var quiet = RS.quietThree({ controls: controls });
+  var lastSpin = performance.now();
   function tick() {
     requestAnimationFrame(tick);
-    galaxy.rotation.y += 0.000008;
-    updateArmLabels();
     controls.update();
+    if (!quiet.frame(false)) return;
+    var now = performance.now();
+    galaxy.rotation.y += 0.000008 * (now - lastSpin) / (1000 / 60);
+    lastSpin = now;
+    updateArmLabels();
     renderer.render(scene, camera);
   }
   tick();
