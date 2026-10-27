@@ -1,0 +1,30 @@
+# GalacticResource
+
+> Domain research archive for the Milky Way. Literature reviews and primary-source analyses. Curated by Corgan Studio, Inc.
+
+Research Archive: https://galacticresource.com/research/ (literature reviews by Corgan Studio, Inc., open to read).
+
+## Research Archive
+
+- [Exoplanet habitability and stellar neighborhood statistics](https://galacticresource.com/research/exoplanet-habitability-stats): Review of the exoplanet population statistics relevant to habitability - the eta-Earth occurrence rate from Kepler, the ongoing TESS and PLATO surveys, the M-dwarf habitable-zone-planet inventory, and the stellar-neighbourhood census within 10 parsecs.
+- [Galactic chemical evolution from stellar spectra](https://galacticresource.com/research/galactic-chemical-evolution): Review of the Milky Way's chemical-abundance history as resolved by APOGEE, Gaia-ESO, and GALAH spectroscopic surveys, the radial and vertical chemical gradients, and the connection to the disc and halo formation history.
+- [HII regions and star-forming complexes in the Milky Way](https://galacticresource.com/research/hii-star-forming-regions): Review of the Galactic HII region population, the WISE all-sky catalogue, the spiral-arm tracing methodology, and the relationship between HII region statistics and the Galactic star-formation rate.
+- [Milky Way bar structure from Gaia Data Release 3](https://galacticresource.com/research/milky-way-bar-gaia-dr3): Review of the Gaia Data Release 3 stellar census and what the bar's confirmed half-length, pattern speed, and tilt mean for inner-Galaxy dynamics, dark-matter distribution, and pulsar timing.
+- [The Milky Way rotation curve and dark-matter constraints](https://galacticresource.com/research/milky-way-rotation-curve-dark-matter): Review of the Milky Way rotation curve as resolved by Gaia astrometric data, the dark-matter halo profile required to explain the flat outer rotation, and the constraints on alternative-gravity hypotheses.
+
+## Related archives
+
+- [TerraResource Research Archive](https://terraresource.net/research/)
+- [MoonResource Research Archive](https://moonresource.com/research/)
+- [MarsResource Research Archive](https://marsresource.net/research/)
+- [SunResource Research Archive](https://sunresource.net/research/)
+- [MercuryResource Research Archive](https://mercuryresource.net/research/)
+- [VenusResource Research Archive](https://venusresource.net/research/)
+- [JupiterResource Research Archive](https://jupiterresource.net/research/)
+- [SaturnResource Research Archive](https://saturnresource.net/research/)
+- [UranusResource Research Archive](https://uranusresource.net/research/)
+- [NeptuneResource Research Archive](https://neptuneresource.net/research/)
+- [PlutoResource Research Archive](https://plutoresource.net/research/)
+- [SolarSystemResource Research Archive](https://solarsystemresource.com/research/)
+
+Sitemap: https://galacticresource.com/sitemap.xml
